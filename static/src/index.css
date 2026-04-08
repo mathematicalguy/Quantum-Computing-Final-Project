@@ -1,0 +1,98 @@
+:root {
+  /* Forced dark theme */
+  --bg-deep:    #0d0f14;
+  --bg:         #13151c;
+  --bg-card:    #1a1d27;
+  --bg-raised:  #21253200;
+  --border:     #2a2d3d;
+  --border-subtle: #1f2230;
+
+  --text:       #a8b0c8;
+  --text-muted: #8891aa;
+  --text-h:     #e8eaf2;
+
+  --code-bg:    #1e2130;
+  --accent:     #7c6fff;
+  --accent-2:   #56cfb2;
+  --accent-bg:  rgba(124, 111, 255, 0.12);
+  --accent-border: rgba(124, 111, 255, 0.4);
+
+  --glow: 0 0 24px rgba(124, 111, 255, 0.18);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3);
+
+  --sans:    'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono:    'JetBrains Mono', 'Fira Code', ui-monospace, Consolas, monospace;
+
+  font: 16px/1.6 var(--sans);
+  letter-spacing: 0.01em;
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg-deep);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  background-image: url('/Quantum-Computing-Final-Project/Background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+h1, h2 {
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+h1 {
+  font-size: 2.4rem;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #e8eaf2 0%, #7c6fff 60%, #56cfb2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+p { margin: 0; }
+
+code, .counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 5px;
+  color: var(--accent-2);
+}
+
+code {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  padding: 2px 7px;
+  background: var(--code-bg);
+  border: 1px solid var(--border-subtle);
+}
