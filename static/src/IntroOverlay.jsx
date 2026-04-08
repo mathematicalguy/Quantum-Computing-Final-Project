@@ -1,131 +1,109 @@
-import { useEffect, useState } from 'react'
+ï»¿import { useEffect, useState } from 'react'
 import './IntroOverlay.css'
 
-// React is removed from DOM after this delay (ms) — must be > CSS animation end
+// React is removed from DOM after this delay (ms) â€” must be > CSS animation end
 const REMOVE_DELAY = 3550
 
 // SVG canvas: 560x560, center at 280,280
 const CX = 280
 const CY = 280
 
-// Ring definitions — drawn outermost to innermost
-// r     : radius
-// sw    : primary stroke width (the main PCB trace)
-// color : neon color
-// dash  : strokeDasharray — long segment, gap, tiny pad, gap (PCB trace rhythm)
-// dur   : seconds for one full rotation
-// cw    : true = clockwise, false = counter-clockwise
+// Interpolate between magenta (#e040fb) and cyan (#00e5ff) based on t in [0,1]
+function lerpColor(t) {
+  const r = Math.round(0xe0 + (0x00 - 0xe0) * t)
+  const g = Math.round(0x40 + (0xe5 - 0x40) * t)
+  const b = Math.round(0xfb + (0xff - 0xfb) * t)
+  return `rgb(${r},${g},${b})`
+}
+
+// Ring definitions â€” drawn outermost to innermost.
+// t  : color blend 0=magenta, 1=cyan
+// sw : stroke width
+// dur: rotation period (s)
+// cw : clockwise direction
+// arcs: [{start, span}] partial arc segments in degrees
 const RINGS = [
-  { r: 252, sw: 2,  color: '#00e5ff', dash: '30 5 3 5',         dur: 7.0, cw: true  },
-  { r: 228, sw: 8,  color: '#6b1fef', dash: '55 4 4 4 4 4',     dur: 5.5, cw: false },
-  { r: 204, sw: 2,  color: '#00cfff', dash: '14 5 2 5',         dur: 8.5, cw: true  },
-  { r: 180, sw: 9,  color: '#c030fb', dash: '62 5 4 5 4 5',     dur: 4.8, cw: false },
-  { r: 156, sw: 3,  color: '#18c8ff', dash: '22 5 2 5',         dur: 9.2, cw: true  },
-  { r: 132, sw: 7,  color: '#8840e8', dash: '40 4 3 4',         dur: 6.1, cw: false },
-  { r: 108, sw: 2,  color: '#00f0ff', dash: '12 4 2 4',         dur: 7.8, cw: true  },
-  { r:  84, sw: 5,  color: '#a050ff', dash: '28 4 2 4',         dur: 5.2, cw: false },
+  { r: 252, sw: 2.5, t: 0.00, dur: 11.0, cw: true,  arcs: [{ start:  10, span: 70 },{ start:  95, span: 45 },{ start: 150, span: 15 },{ start: 172, span:  8 },{ start: 185, span: 60 },{ start: 252, span: 90 },{ start: 348, span: 40 }] },
+  { r: 236, sw: 7.0, t: 0.05, dur:  8.2, cw: false, arcs: [{ start:   5, span: 110 },{ start: 125, span: 20 },{ start: 152, span:  8 },{ start: 168, span: 75 },{ start: 255, span: 50 },{ start: 315, span: 30 },{ start: 350, span: 12 }] },
+  { r: 218, sw: 1.5, t: 0.12, dur: 14.5, cw: true,  arcs: [{ start:  20, span: 55 },{ start:  85, span: 12 },{ start: 105, span: 80 },{ start: 195, span: 35 },{ start: 238, span:  8 },{ start: 254, span: 55 },{ start: 318, span: 30 }] },
+  { r: 200, sw: 9.5, t: 0.22, dur:  7.0, cw: false, arcs: [{ start:   0, span: 95 },{ start: 102, span: 15 },{ start: 125, span: 65 },{ start: 198, span: 45 },{ start: 252, span: 12 },{ start: 272, span: 70 },{ start: 348, span: 10 }] },
+  { r: 180, sw: 3.0, t: 0.35, dur: 10.8, cw: true,  arcs: [{ start:  15, span: 40 },{ start:  63, span:  8 },{ start:  78, span: 55 },{ start: 142, span: 90 },{ start: 240, span: 30 },{ start: 278, span: 12 },{ start: 298, span: 50 }] },
+  { r: 162, sw: 6.5, t: 0.50, dur:  9.0, cw: false, arcs: [{ start:   8, span: 80 },{ start:  96, span: 35 },{ start: 138, span: 10 },{ start: 156, span: 60 },{ start: 225, span: 45 },{ start: 278, span: 18 },{ start: 304, span: 48 }] },
+  { r: 143, sw: 2.0, t: 0.63, dur: 13.0, cw: true,  arcs: [{ start:  25, span: 60 },{ start:  92, span: 20 },{ start: 120, span: 70 },{ start: 200, span: 40 },{ start: 248, span: 10 },{ start: 266, span: 55 },{ start: 328, span: 25 }] },
+  { r: 124, sw: 8.0, t: 0.75, dur:  6.5, cw: false, arcs: [{ start:   0, span: 75 },{ start:  83, span: 25 },{ start: 116, span: 10 },{ start: 134, span: 80 },{ start: 222, span: 50 },{ start: 280, span: 15 },{ start: 303, span: 45 }] },
+  { r: 105, sw: 2.5, t: 0.86, dur: 11.5, cw: true,  arcs: [{ start:  12, span: 50 },{ start:  70, span: 15 },{ start:  93, span: 65 },{ start: 168, span: 35 },{ start: 212, span: 10 },{ start: 230, span: 80 },{ start: 318, span: 30 }] },
+  { r:  86, sw: 5.5, t: 0.94, dur:  8.8, cw: false, arcs: [{ start:   5, span: 85 },{ start: 100, span: 30 },{ start: 140, span: 10 },{ start: 158, span: 60 },{ start: 228, span: 40 },{ start: 276, span: 12 },{ start: 296, span: 55 }] },
 ]
 
-// Renders one ring as three layered SVG elements:
-//   1. Wide blurred copy  — outer glow bloom
-//   2. Primary trace      — the actual PCB-style dashed ring
-//   3. Inner shadow trace — thin parallel inner line for double-track depth
-//   4. Junction pads      — small filled circles every 45°
-// All four share the same animateTransform so they rotate as one unit.
-function Ring({ ring, idx, halfId }) {
-  const filterId = `glow-${halfId}-${idx}`
-  const center   = `${CX} ${CY}`
-  const fromAttr = `0 ${center}`
-  const toAttr   = `${ring.cw ? 360 : -360} ${center}`
-  const durStr   = `${ring.dur}s`
+// Convert polar arc (center, radius, startDeg, spanDeg) to an SVG arc path string
+function arcPath(cx, cy, r, startDeg, spanDeg) {
+  const toRad = (d) => (d * Math.PI) / 180
+  const sx = cx + r * Math.cos(toRad(startDeg))
+  const sy = cy + r * Math.sin(toRad(startDeg))
+  const ex = cx + r * Math.cos(toRad(startDeg + spanDeg))
+  const ey = cy + r * Math.sin(toRad(startDeg + spanDeg))
+  const large = spanDeg > 180 ? 1 : 0
+  return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`
+}
 
-  // Thin inner shadow trace offset inward by (sw + 2px)
-  const innerR = ring.r - ring.sw - 2
+// One ring: rotating bloom halo + crisp primary arcs
+function Ring({ ring, idx, halfId }) {
+  const glowId  = `glow-${halfId}-${idx}`
+  const color   = lerpColor(ring.t)
+  const center  = `${CX} ${CY}`
+  const fromRot = `0 ${center}`
+  const toRot   = `${ring.cw ? 360 : -360} ${center}`
+  const durStr  = `${ring.dur}s`
+  const bloomSd = ring.sw * 2.2
 
   return (
     <g>
       <defs>
-        <filter id={filterId} x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation={ring.sw * 1.8} result="bloom" />
+        <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation={bloomSd} result="blur" />
           <feMerge>
-            <feMergeNode in="bloom" />
+            <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
       </defs>
 
-      {/* 1. Outer glow bloom — wide, transparent, blurred */}
-      <circle
-        cx={CX} cy={CY} r={ring.r}
-        fill="none"
-        stroke={ring.color}
-        strokeWidth={ring.sw + 8}
-        strokeDasharray={ring.dash}
-        strokeLinecap="butt"
-        opacity="0.15"
-        filter={`url(#${filterId})`}
-      >
+      {/* Wide bloom halo â€” semi-transparent, blurred */}
+      <g opacity="0.22" filter={`url(#${glowId})`}>
         <animateTransform attributeName="transform" type="rotate"
-          from={fromAttr} to={toAttr} dur={durStr} repeatCount="indefinite" />
-      </circle>
+          from={fromRot} to={toRot} dur={durStr} repeatCount="indefinite" />
+        {ring.arcs.map((arc, ai) => (
+          <path
+            key={ai}
+            d={arcPath(CX, CY, ring.r, arc.start, arc.span)}
+            fill="none"
+            stroke={color}
+            strokeWidth={ring.sw + 6}
+            strokeLinecap="round"
+          />
+        ))}
+      </g>
 
-      {/* 2. Primary PCB trace */}
-      <circle
-        cx={CX} cy={CY} r={ring.r}
-        fill="none"
-        stroke={ring.color}
-        strokeWidth={ring.sw}
-        strokeDasharray={ring.dash}
-        strokeLinecap="butt"
-        opacity="1"
-        filter={`url(#${filterId})`}
-      >
+      {/* Crisp primary arcs */}
+      <g filter={`url(#${glowId})`}>
         <animateTransform attributeName="transform" type="rotate"
-          from={fromAttr} to={toAttr} dur={durStr} repeatCount="indefinite" />
-      </circle>
-
-      {/* 3. Inner shadow trace — classic PCB double-line look */}
-      {innerR > 0 && (
-        <circle
-          cx={CX} cy={CY} r={innerR}
-          fill="none"
-          stroke={ring.color}
-          strokeWidth={1}
-          strokeDasharray={`${parseFloat(ring.dash) * 0.55} 999`}
-          strokeLinecap="butt"
-          opacity="0.28"
-        >
-          <animateTransform attributeName="transform" type="rotate"
-            from={fromAttr} to={toAttr} dur={durStr} repeatCount="indefinite" />
-        </circle>
-      )}
-
-      {/* 4. Junction pads — 8 filled circles evenly spaced, rotate with the trace */}
-      <g>
-        <animateTransform attributeName="transform" type="rotate"
-          from={fromAttr} to={toAttr} dur={durStr} repeatCount="indefinite" />
-        {Array.from({ length: 8 }, (_, k) => {
-          const angle = (k / 8) * 2 * Math.PI - Math.PI / 2
-          const px = CX + ring.r * Math.cos(angle)
-          const py = CY + ring.r * Math.sin(angle)
-          return (
-            <circle
-              key={k}
-              cx={px} cy={py}
-              r={ring.sw * 1.1 + 0.5}
-              fill={ring.color}
-              opacity="0.9"
-              filter={`url(#${filterId})`}
-            />
-          )
-        })}
+          from={fromRot} to={toRot} dur={durStr} repeatCount="indefinite" />
+        {ring.arcs.map((arc, ai) => (
+          <path
+            key={ai}
+            d={arcPath(CX, CY, ring.r, arc.start, arc.span)}
+            fill="none"
+            stroke={color}
+            strokeWidth={ring.sw}
+            strokeLinecap="round"
+            opacity="0.95"
+          />
+        ))}
       </g>
     </g>
   )
 }
 
-// Renders the full SVG for one half (top or bottom).
-// Both halves get the exact same SVG — the parent div clips them.
 function RingsSVG({ half }) {
   return (
     <svg
@@ -139,29 +117,23 @@ function RingsSVG({ half }) {
         <Ring key={i} ring={ring} idx={i} halfId={half} />
       ))}
 
-      {/* Central energy core — only in top SVG so it doesn't double-render */}
       {half === 'top' && (
         <>
           <defs>
             <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
               <stop offset="0%"   stopColor="#ffffff" stopOpacity="1.0" />
-              <stop offset="20%"  stopColor="#d0b8ff" stopOpacity="0.95" />
-              <stop offset="55%"  stopColor="#7b2fff" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#7b2fff" stopOpacity="0" />
+              <stop offset="18%"  stopColor="#e8c0ff" stopOpacity="0.95" />
+              <stop offset="55%"  stopColor="#7b10cc" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#7b10cc" stopOpacity="0" />
             </radialGradient>
-            <filter id="core-bloom" x="-200%" y="-200%" width="500%" height="500%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="12" />
+            <filter id="core-bloom" x="-250%" y="-250%" width="600%" height="600%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="14" />
             </filter>
           </defs>
-          {/* Soft outer bloom */}
-          <circle cx={CX} cy={CY} r={48}
-            fill="url(#coreGrad)"
-            filter="url(#core-bloom)"
-            opacity="0.65" />
-          {/* Crisp inner core */}
-          <circle cx={CX} cy={CY} r={18}
-            fill="url(#coreGrad)"
-            opacity="0.98" />
+          <circle cx={CX} cy={CY} r={55}
+            fill="url(#coreGrad)" filter="url(#core-bloom)" opacity="0.7" />
+          <circle cx={CX} cy={CY} r={20}
+            fill="url(#coreGrad)" opacity="0.98" />
         </>
       )}
     </svg>
@@ -189,3 +161,4 @@ export default function IntroOverlay() {
     </div>
   )
 }
+
