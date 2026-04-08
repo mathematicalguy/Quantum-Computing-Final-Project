@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { allBitstrings, buildOracleFromMapping, runSimon } from './simon.js'
+import CircuitCanvas from './CircuitCanvas.jsx'
 import './App.css'
 
 const DEFAULT_N = 3
@@ -198,6 +199,7 @@ function App() {
 
   return (
     <div className="app">
+      <CircuitCanvas />
       <header className="app-header">
         <h1>Simon&apos;s Algorithm Simulator</h1>
         <p className="subtitle">
