@@ -99,13 +99,13 @@ function ResultsPanel({ result, onDownload }) {
           </div>
 
           <div className="result-row">
-            <span className="result-label">Equations collected (y XOR s = 0):</span>
+            <span className="result-label">Equations collected (y · s = 0):</span>
             <div className="equation-list">
               {equations.length === 0
                 ? <em>None needed (trivial case)</em>
                 : equations.map((eq, i) => (
-                    <div key={i} className="equation-item">
-                      <code>{eq}</code> XOR s = 0
+                  <div key={i} className="equation-item">
+                      <code>{eq}</code> · s = 0
                     </div>
                   ))}
             </div>
