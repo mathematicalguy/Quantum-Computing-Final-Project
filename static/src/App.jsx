@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { allBitstrings, buildOracleFromMapping, runSimon } from './simon.js'
 import CircuitCanvas from './CircuitCanvas.jsx'
+import IntroOverlay from './IntroOverlay.jsx'
 import './App.css'
 
 const DEFAULT_N = 3
@@ -99,13 +100,13 @@ function ResultsPanel({ result, onDownload }) {
           </div>
 
           <div className="result-row">
-            <span className="result-label">Equations collected (y · s = 0):</span>
+            <span className="result-label">Equations collected (y &middot; s = 0):</span>
             <div className="equation-list">
               {equations.length === 0
                 ? <em>None needed (trivial case)</em>
                 : equations.map((eq, i) => (
                   <div key={i} className="equation-item">
-                      <code>{eq}</code> · s = 0
+                      <code>{eq}</code> &middot; s = 0
                     </div>
                   ))}
             </div>
@@ -199,6 +200,7 @@ function App() {
 
   return (
     <div className="app">
+      <IntroOverlay />
       <CircuitCanvas />
       <header className="app-header">
         <h1>Simon&apos;s Algorithm Simulator</h1>

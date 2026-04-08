@@ -1,0 +1,86 @@
+/*
+  IntroOverlay.css
+  Phase 1  0.0s - 2.4s : SVG animateTransform spins rings alternating CW/CCW
+  Phase 2  2.4s - 3.1s : top half slides up, bottom half slides down
+  Phase 3  3.1s - 3.5s : overlay fades out, React removes it from DOM
+*/
+
+/* ?? Full-screen backdrop ????????????????????????????????????? */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #020010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  animation: io-fade-out 0.4s ease-in 3.1s both;
+}
+
+@keyframes io-fade-out {
+  to { opacity: 0; pointer-events: none; }
+}
+
+/* Scanline texture */
+.intro-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 210, 255, 0.02) 3px,
+    rgba(0, 210, 255, 0.02) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ?? Two half-wrappers clip the SVG at the horizontal midpoint ?? */
+.intro-half-wrap {
+  position: absolute;
+  width: 560px;
+  height: 280px;
+  overflow: hidden;
+}
+
+/* Top half: bottom edge sits on screen center */
+.intro-half-wrap--top {
+  top: calc(50% - 280px);
+  left: calc(50% - 280px);
+  animation: io-split-top 0.72s cubic-bezier(0.55, 0, 0.45, 1) 2.4s both;
+}
+
+/* Bottom half: top edge sits on screen center */
+.intro-half-wrap--bot {
+  top: 50%;
+  left: calc(50% - 280px);
+  animation: io-split-bot 0.72s cubic-bezier(0.55, 0, 0.45, 1) 2.4s both;
+}
+
+@keyframes io-split-top {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-120vh); }
+}
+
+@keyframes io-split-bot {
+  from { transform: translateY(0); }
+  to   { transform: translateY(120vh); }
+}
+
+/* ?? SVG sits flush inside each half-wrapper ?????????????????? */
+.intro-svg--top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+.intro-svg--bot {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: block;
+}
