@@ -243,7 +243,7 @@ export function runSimon(oracle, n) {
       queryLog.push({
         queryIndex,
         y,
-        equation: `${y} XOR s = 0`,
+        equation: `${y}  * s = 0`,
       })
     }
   }
