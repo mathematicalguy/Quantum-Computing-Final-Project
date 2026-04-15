@@ -266,19 +266,30 @@ export function runSimon(oracle, n) {
 
 /**
  * Returns true if y is linearly independent of the current equation set.
+ *
+ * Builds a reduced row echelon form (RREF) from the existing equations,
+ * then reduces y against it.  If y reduces to non-zero it is independent.
  */
 function isLinearlyIndependent(y, current, n) {
   if (current.length === 0) return y !== '0'.repeat(n)
 
-  // Run partial Gaussian elimination
-  const rows = current.map((eq) => parseInt(eq, 2))
-  let candidate = parseInt(y, 2)
+  // Build RREF from existing equations
+  const basis = new Array(n).fill(0) // basis[col] = reduced row with pivot at col, or 0
+  for (const eq of current) {
+    let val = parseInt(eq, 2)
+    for (let col = n - 1; col >= 0; col--) {
+      if (!((val >> col) & 1)) continue
+      if (basis[col] === 0) { basis[col] = val; break }
+      val ^= basis[col]
+    }
+  }
 
+  // Reduce candidate against the basis
+  let candidate = parseInt(y, 2)
   for (let col = n - 1; col >= 0; col--) {
     if (!((candidate >> col) & 1)) continue
-    const pivot = rows.find((r) => (r >> col) & 1)
-    if (pivot === undefined) return true // new pivot found
-    candidate ^= pivot
+    if (basis[col] === 0) return true // new pivot position — independent
+    candidate ^= basis[col]
   }
 
   return candidate !== 0
