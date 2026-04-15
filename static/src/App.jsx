@@ -20,6 +20,27 @@ function buildDefaultMapping(n) {
       '111': '101',
     }
   }
+  // Default: custom 2-to-1 mapping (n=4, s=1010)
+  if (n === 4) {
+    return {
+      '0000': '0000',
+      '0001': '0001',
+      '0010': '0010',
+      '0011': '0011',
+      '0100': '0100',
+      '0101': '0101',
+      '0110': '0110',
+      '0111': '0111',
+      '1000': '0010',
+      '1001': '0011',
+      '1010': '0000',
+      '1011': '0001',
+      '1100': '0110',
+      '1101': '0111',
+      '1110': '0100',
+      '1111': '0101',
+    }
+  }
   // Generic identity (1-to-1) default for other n
   const inputs = allBitstrings(n)
   const m = {}
@@ -88,7 +109,7 @@ function ResultsPanel({ result, onDownload }) {
         <>
           <div className="alert alert-error">
             This mapping is <strong>not a valid Simon&apos;s oracle</strong>.
-            Every colliding pair f(x?)&nbsp;=&nbsp;f(x?) must satisfy x?&nbsp;?&nbsp;x?&nbsp;=&nbsp;<em>s</em> for
+            Every colliding pair f(x1)&nbsp;=&nbsp;f(x2) must satisfy x1&nbsp;XOR&nbsp;x2&nbsp;=&nbsp;<em>s</em> for
             the <strong>same</strong> secret string <em>s</em>, but your mapping produces different
             XOR values across pairs.
           </div>
@@ -99,10 +120,10 @@ function ResultsPanel({ result, onDownload }) {
               <table className="result-table">
                 <thead>
                   <tr>
-                    <th>x?</th>
-                    <th>x?</th>
+                    <th>x1</th>
+                    <th>x2</th>
                     <th>f(x)</th>
-                    <th>x? ? x?</th>
+                    <th>x1 XOR x2</th>
                   </tr>
                 </thead>
                 <tbody>
