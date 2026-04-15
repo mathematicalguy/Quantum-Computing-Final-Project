@@ -49,41 +49,61 @@ export function validateOracle(mapping, n) {
   const inputs = allBitstrings(n)
   const zero = '0'.repeat(n)
 
-  // Check injectivity first — find any collision
-  const seen = new Map() // output -> first input that produced it
-  let candidateS = null
-
+  // Collect every collision: output -> [list of inputs]
+  const buckets = new Map()
   for (const x of inputs) {
     const fx = mapping[x]
-    if (seen.has(fx)) {
-      const x2 = seen.get(fx)
-      const s = xorStrings(x, x2)
-      if (s === zero) return { valid: false, secret: null, isOneToOne: false }
-      if (candidateS === null) {
-        candidateS = s
-      } else if (candidateS !== s) {
-        // Two different non-zero XOR values — not Simon-valid
-        return { valid: false, secret: null, isOneToOne: false }
+    if (!buckets.has(fx)) buckets.set(fx, [])
+    buckets.get(fx).push(x)
+  }
+
+  // Build collision pair list with the XOR for each pair
+  const collisions = []
+  let candidateS = null
+  let hasConflict = false
+
+  for (const [fx, xs] of buckets) {
+    if (xs.length === 1) continue // no collision for this output
+    if (xs.length > 2) {
+      // More than 2 inputs map to the same output — not 2-to-1
+      for (let i = 0; i < xs.length; i++) {
+        for (let j = i + 1; j < xs.length; j++) {
+          collisions.push({ x1: xs[i], x2: xs[j], fx, s: xorStrings(xs[i], xs[j]) })
+        }
       }
-    } else {
-      seen.set(fx, x)
+      hasConflict = true
+      continue
+    }
+    const [x1, x2] = xs
+    const s = xorStrings(x1, x2)
+    collisions.push({ x1, x2, fx, s })
+    if (s === zero) {
+      hasConflict = true
+    } else if (candidateS === null) {
+      candidateS = s
+    } else if (candidateS !== s) {
+      hasConflict = true
     }
   }
 
-  if (candidateS === null) {
+  if (collisions.length === 0) {
     // No collisions: 1-to-1 function, s = 0...0
-    return { valid: true, secret: zero, isOneToOne: true }
+    return { valid: true, secret: zero, isOneToOne: true, collisions: [] }
+  }
+
+  if (hasConflict) {
+    return { valid: false, secret: null, isOneToOne: false, collisions }
   }
 
   // Verify every pair: f(x) must equal f(x XOR s) for all x
   for (const x of inputs) {
     const partner = xorStrings(x, candidateS)
     if (mapping[x] !== mapping[partner]) {
-      return { valid: false, secret: null, isOneToOne: false }
+      return { valid: false, secret: null, isOneToOne: false, collisions }
     }
   }
 
-  return { valid: true, secret: candidateS, isOneToOne: false }
+  return { valid: true, secret: candidateS, isOneToOne: false, collisions }
 }
 
 // -- Gaussian elimination over GF(2) -------------------------------------
@@ -199,7 +219,7 @@ export function runSimon(oracle, n) {
   oracleTable.forEach(({ x, fx }) => { mapping[x] = fx })
 
   // Validate the oracle satisfies Simon's promise
-  const { valid, secret, isOneToOne } = validateOracle(mapping, n)
+  const { valid, secret, isOneToOne, collisions } = validateOracle(mapping, n)
 
   if (!valid) {
     return {
@@ -210,6 +230,7 @@ export function runSimon(oracle, n) {
       recoveredSecrets: [],
       queryLog: [],
       oracleTable,
+      collisions,
     }
   }
 

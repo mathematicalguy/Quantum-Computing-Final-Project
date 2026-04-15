@@ -85,10 +85,46 @@ function ResultsPanel({ result, onDownload }) {
       </div>
 
       {!consistent && (
-        <div className="alert alert-error">
-          The oracle is not consistent with Simon&apos;s promise (not 2-to-1 or 1-to-1 with a fixed s).
-          Please fix the mapping.
-        </div>
+        <>
+          <div className="alert alert-error">
+            This mapping is <strong>not a valid Simon&apos;s oracle</strong>.
+            Every colliding pair f(x?)&nbsp;=&nbsp;f(x?) must satisfy x?&nbsp;?&nbsp;x?&nbsp;=&nbsp;<em>s</em> for
+            the <strong>same</strong> secret string <em>s</em>, but your mapping produces different
+            XOR values across pairs.
+          </div>
+
+          {result.collisions && result.collisions.length > 0 && (
+            <details className="collapsible" open>
+              <summary>Collision diagnostics ({result.collisions.length} pairs)</summary>
+              <table className="result-table">
+                <thead>
+                  <tr>
+                    <th>x?</th>
+                    <th>x?</th>
+                    <th>f(x)</th>
+                    <th>x? ? x?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const sValues = new Set(result.collisions.map((c) => c.s))
+                    const isConflict = sValues.size > 1
+                    return result.collisions.map((c, i) => (
+                      <tr key={i}>
+                        <td><code>{c.x1}</code></td>
+                        <td><code>{c.x2}</code></td>
+                        <td><code>{c.fx}</code></td>
+                        <td>
+                          <code className={isConflict ? 'collision-conflict' : ''}>{c.s}</code>
+                        </td>
+                      </tr>
+                    ))
+                  })()}
+                </tbody>
+              </table>
+            </details>
+          )}
+        </>
       )}
 
       {consistent && (

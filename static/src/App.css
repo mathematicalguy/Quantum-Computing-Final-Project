@@ -229,6 +229,11 @@
   color: #fca5a5;
 }
 
+.collision-conflict {
+  color: #f87171;
+  font-weight: 700;
+}
+
 /* ?? Results ?? */
 .results {
   border: 1px solid var(--border);
