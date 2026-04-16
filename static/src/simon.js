@@ -178,25 +178,85 @@ function solveGF2(equations, n) {
 
 // -- Quantum simulation -------------------------------------
 
+// -- Full state-vector quantum simulation ---------------------
+
 /**
- * Simulate a single quantum query to the Simon oracle.
+ * Simulate a single run of Simon's quantum circuit on 2n qubits
+ * using full state-vector evolution.  No knowledge of s is used.
  *
- * In Simon's algorithm, each query produces a uniformly random y in {0,1}^n
- * such that y · s = 0 (mod 2).  We simulate this classically.
+ * The circuit is:
+ *   |0>^n |0>^n  -->  H^n ? I  -->  U_f  -->  H^n ? I  -->  measure input register
  *
- * @param {string} secret  - the hidden s string
+ * State vector has 2^(2n) complex amplitudes (stored as real numbers
+ * since all amplitudes in Simon's circuit are real).
+ *
+ * @param {object} mapping - oracle lookup table { '000': '001', ... }
  * @param {number} n
- * @returns {string} sampled y
+ * @returns {string} measured y from the input register
  */
-function quantumQuery(secret, n) {
-  const zero = '0'.repeat(n)
-  while (true) {
-    // Pick a random n-bit string
-    let y = ''
-    for (let i = 0; i < n; i++) y += Math.random() < 0.5 ? '0' : '1'
-    // Accept if y · s = 0 mod 2 (always true when s = 0...0)
-    if (dotMod2(y, secret) === 0) return y
+function quantumQuery(mapping, n) {
+  const N = 1 << n        // 2^n
+  const NN = 1 << (2 * n) // 2^(2n) — full state-vector size
+
+  // --- Step 0: Initialize |0...0> ---
+  // --- Step 1: Apply H^n to input register (top n qubits) ---
+  // Combined: (1/sqrt(N)) sum_x |x>|0>^n
+  // Index layout: |x>|w> lives at index (x << n) | w
+  const afterH1 = new Float64Array(NN)
+  const invSqrtN = 1.0 / Math.sqrt(N)
+  for (let x = 0; x < N; x++) {
+    afterH1[x << n] = invSqrtN
   }
+
+  // --- Step 2: Apply U_f: |x>|w> -> |x>|w XOR f(x)> ---
+  const afterUf = new Float64Array(NN)
+  for (let idx = 0; idx < NN; idx++) {
+    if (afterH1[idx] === 0) continue
+    const x = idx >> n
+    const w = idx & (N - 1)
+    const xStr = x.toString(2).padStart(n, '0')
+    const fx = parseInt(mapping[xStr], 2)
+    const newIdx = (x << n) | (w ^ fx)
+    afterUf[newIdx] += afterH1[idx]
+  }
+
+  // --- Step 3: Apply H^n to input register again ---
+  // H^n|x> = (1/sqrt(N)) sum_y (-1)^(x·y) |y>
+  const afterH2 = new Float64Array(NN)
+  for (let idx = 0; idx < NN; idx++) {
+    if (afterUf[idx] === 0) continue
+    const x = idx >> n
+    const w = idx & (N - 1)
+    const amp = afterUf[idx]
+    const scaled = amp * invSqrtN
+    for (let y = 0; y < N; y++) {
+      // (-1)^(x·y) via popcount parity of (x & y)
+      let bits = x & y
+      let parity = 0
+      while (bits) { parity ^= 1; bits &= bits - 1 }
+      const newIdx = (y << n) | w
+      afterH2[newIdx] += parity ? -scaled : scaled
+    }
+  }
+
+  // --- Step 4: Measure the input register ---
+  // P(y) = sum_w |<y,w|state>|^2
+  const probs = new Float64Array(N)
+  for (let idx = 0; idx < NN; idx++) {
+    const y = idx >> n
+    probs[y] += afterH2[idx] * afterH2[idx]
+  }
+
+  // Sample from the distribution
+  const r = Math.random()
+  let cumulative = 0
+  for (let y = 0; y < N; y++) {
+    cumulative += probs[y]
+    if (r < cumulative) {
+      return y.toString(2).padStart(n, '0')
+    }
+  }
+  return (N - 1).toString(2).padStart(n, '0')
 }
 
 // -- Main entry point ------------------------------
@@ -255,7 +315,7 @@ export function runSimon(oracle, n) {
   const maxQueries = n * 20 // safety cap
 
   while (equations.length < n - 1 && queryIndex < maxQueries) {
-    const y = quantumQuery(secret, n)
+    const y = quantumQuery(mapping, n)
     queryIndex++
 
     // Check if y is linearly independent of current equations over GF(2)
