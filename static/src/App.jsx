@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { allBitstrings, buildOracleFromMapping, runSimon } from './simon.js'
 import CircuitCanvas from './CircuitCanvas.jsx'
 import IntroOverlay from './IntroOverlay.jsx'
@@ -265,6 +266,11 @@ function App() {
           Define a custom oracle f : [0,1]<sup>n</sup> &rarr; [0,1]<sup>n</sup> and
           simulate the quantum algorithm to recover the hidden string <em>s</em>.
         </p>
+        <div className="header-links">
+          <Link to="/explorer" className="explorer-link">
+            View All 2-Qubit Oracles ?
+          </Link>
+        </div>
       </header>
 
       <main className="app-main">

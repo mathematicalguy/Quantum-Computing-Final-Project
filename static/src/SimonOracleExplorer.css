@@ -1,0 +1,262 @@
+.oracle-explorer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  padding: 2rem;
+}
+
+.explorer-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.explorer-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.explorer-subtitle {
+  font-size: 1.1rem;
+  color: #b0b0b0;
+  margin-bottom: 1rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateX(-4px);
+}
+
+.explorer-controls {
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.explorer-controls h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.s-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.btn-s {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: #b0b0b0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-s:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.btn-s.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.oracle-info {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.info-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #888;
+}
+
+.info-value {
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+}
+
+.oracle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.oracle-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.oracle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.oracle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.oracle-id {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.oracle-secret {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.oracle-pairs {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+  font-family: 'Courier New', monospace;
+}
+
+.oracle-mini-table {
+  width: 100%;
+  font-family: 'Courier New', monospace;
+}
+
+.oracle-mini-table tr {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.oracle-mini-table tr:last-child {
+  border-bottom: none;
+}
+
+.input-cell {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+}
+
+.output-cell {
+  font-weight: 600;
+}
+
+.output-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.output-dot::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.output-00::before {
+  background: #4ade80;
+}
+
+.output-01::before {
+  background: #60a5fa;
+}
+
+.output-10::before {
+  background: #f472b6;
+}
+
+.output-11::before {
+  background: #fbbf24;
+}
+
+.explorer-footer {
+  max-width: 1200px;
+  margin: 3rem auto 0;
+  padding: 2rem;
+  text-align: center;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+}
+
+.explorer-footer > div {
+  margin-bottom: 0.5rem;
+}
+
+.footer-note {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .oracle-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .explorer-header h1 {
+    font-size: 2rem;
+  }
+
+  .s-selector {
+    flex-direction: column;
+  }
+
+  .btn-s {
+    width: 100%;
+  }
+}
