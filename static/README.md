@@ -25,7 +25,9 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/` for the simulator or `http://localhost:5173/explorer` for the oracle explorer.
+Visit `http://localhost:5173/` for the simulator or `http://localhost:5173/#/explorer` for the oracle explorer.
+
+**Note:** This app uses HashRouter for GitHub Pages compatibility, so routes use the `#` symbol (e.g., `/#/explorer`).
 
 ## Building for Production
 
